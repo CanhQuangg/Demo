@@ -31,15 +31,12 @@ public class CensorService {
 		return map;
 	}
 
-	public Map<String, Object> updateCensor(String id) {
+	public Censor updateCensor(String id) {
 		Censor censor = censorRepository.findBy_id(id);
+		censor.setLang("New Lang");
 
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
-		});
+		return censorRepository.save(censor);
 
-//		return censorRepository.save(censor);
-		return map;
 	}
 
 }

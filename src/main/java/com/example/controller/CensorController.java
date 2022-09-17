@@ -35,6 +35,6 @@ public class CensorController {
 
 	@PutMapping("/{id}")
 	public Censor updateCensor(@PathVariable(name = "id") String id) {
-		return (Censor) censorService.updateCensor(id);
+		return censorService.updateCensor(id);
 	}
 }

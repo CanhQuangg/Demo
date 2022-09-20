@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "censor")
-public class Censor {
+public class Censor2 {
 
 	@Id
 	// kiểu dữ liệu ObjectId
@@ -36,18 +36,18 @@ public class Censor {
 		private String actor;
 		private String content;
 
-		private List<Media> medias;
+		private List<Object> medias;
 
-		@NoArgsConstructor
-		@Data
-		public class Media {
-			private Integer height;
-			private String path;
-			private String thumb;
-			private Integer type;
-			private Integer width;
-			private String id;
-		}
+//		@NoArgsConstructor
+//		@Data
+//		public class Media {
+//			private Integer height;
+//			private String path;
+//			private String thumb;
+//			private Integer type;
+//			private Integer width;
+//			private String id;
+//		}
 
 		private String target;
 
@@ -59,7 +59,7 @@ public class Censor {
 		private String langDefault;
 		private Integer isShare;
 
-		private Profile profile;
+		private Object profile;
 
 		@Data
 		@NoArgsConstructor
@@ -70,7 +70,7 @@ public class Censor {
 			private Avatar avatar;
 
 			@Data
-			public class Avatar {
+			class Avatar {
 				private String id;
 				private String path;
 				private String thumb;

@@ -56,6 +56,7 @@ public class CensorController {
 	// cập nhật ngôn ngữ cho censor
 	@PutMapping("/{id}")
 	public Censor updateCensor(@PathVariable(name = "id") String id) {
+//		return censorService.updateCensor(id);
 		return censorService.updateCensor(id);
 	}
 
@@ -68,7 +69,7 @@ public class CensorController {
 
 	@PutMapping("/update/mediatype/{id}")
 	public Censor updateMediaType(@PathVariable(name = "id") String id) {
-		return censorService.updateMediaType(id);
+		return censorService.updateMediaType_v2(id);
 	}
 
 }

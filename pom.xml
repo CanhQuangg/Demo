@@ -50,6 +50,14 @@
 
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>spring-milestone</id>
+			<name>Spring Maven MILESTONE Repository</name>
+			<url>http://repo.springsource.org/libs-milestone</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>

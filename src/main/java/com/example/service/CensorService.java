@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Censor;
 import com.example.entity.Censor.Content.Media;
-import com.example.entity.Censor2;
-import com.example.repository.Censor2Repository;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.result.UpdateResult;
 
 @Service
 public class CensorService {
@@ -23,44 +28,37 @@ public class CensorService {
 	CensorRepository censorRepository;
 
 	@Autowired
-	Censor2Repository censor2Repository;
+	private MongoTemplate mongoTemplate;
 
-	MongoTemplate mongoTemplate;
+	private MongoCollection<Document> getCollectionCensorHis() {
+		return mongoTemplate.getCollection("censor");
+	}
 
 	// lấy tất cả censor
 	public List<Censor> getAllCensor() {
 		return censorRepository.findAll();
 	}
 
+	// findAll Censor with mongoTemplate: using
+	public List<Censor> getAllCensor_v2() {
+		return mongoTemplate.findAll(Censor.class);
+	}
+
 	// lấy censor theo id
 	public Map<String, Object> findCensorById(String id) {
-//		Censor censor = censorRepository.findBy_id(id);
-
-		Censor2 censor2 = censor2Repository.findBy_id(id);
-		System.out.println(censor2);
+		Censor censor = censorRepository.findBy_id(id);
 
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.convertValue(censor2, new TypeReference<Map<String, Object>>() {
+		Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
 		});
 		return map;
 	}
 
-	// lấy medias theo id
-//	public List<Map<String, Object>> getMediasById(String id) {
-//		Censor censor = censorRepository.findBy_id(id);
-//
-//		ObjectMapper mapper = new ObjectMapper();
-//		Map<String, Object> map = mapper.convertValue(censor.getContent(), new TypeReference<Map<String, Object>>() {
-//		});
-//
-//		List<Map<String, Object>> medias = new ArrayList<>();
-//		medias = (List<Map<String, Object>>) map.get("medias");
-//
-//		Map<String, Object> media = mapper.convertValue(medias.get(1), new TypeReference<Map<String, Object>>() {
-//		});
-//
-//		return medias;
-//	}
+	// findById with mongoTemplate: using
+	public Censor findCensorById_v2(String id) {
+		Censor censor = mongoTemplate.findById(id, Censor.class);
+		return censor;
+	}
 
 	// lấy media đầu tiên trong medias
 	public Map<String, Object> getMediasById(String id) {
@@ -86,108 +84,38 @@ public class CensorService {
 		return censorRepository.save(censor);
 	}
 
+	// update lang with mongoTemplate: using
+	public Censor updateCensorLang(String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(id));
+
+		Update update = new Update();
+		update.set("lang", "updated lang");
+
+		return mongoTemplate.findAndModify(query, update, Censor.class);
+	}
+
 	// thêm trường cho media trong medias
 	public Censor addNewFieldInMedias(String id) {
-		Censor censor = censorRepository.findBy_id(id);
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$set", new Document("content.medias.0.newField", "new field value"));
 
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.convertValue(censor.getContent(), new TypeReference<Map<String, Object>>() {
-		});
-
-		List<Map<String, Object>> medias = new ArrayList<>();
-		medias = (List<Map<String, Object>>) map.get("medias");
-
-		Map<String, Object> media = mapper.convertValue(medias.get(1), new TypeReference<Map<String, Object>>() {
-		});
-
-		media.put("newField", "new value");
-		System.out.println(media);
-
-//		// Convert Map to POJO
-		// tạo một censor entity mới có định nghĩa trường mới trong media
-//		Censor updatedCensor = mapper.convertValue(map, Censor.class);
-
-		// phải định nghĩa trường mới cho medias
-//		return censorRepository.save(censor);
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 
 		return null;
 	}
 
-	public List<Censor> getLevelGt2() {
-		return censorRepository.findCensorLevelGreaterThan2();
-	}
-
-	// chưa hoàn thiện
-	// convert từ map sang pojo để update
+	// update media.type with mongoTemplate
 	public Censor updateMediaType(String id) {
-		try {
-			Censor censor = censorRepository.findBy_id(id);
-			ObjectMapper mapper = new ObjectMapper();
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$set", new Document("content.medias.0.type", 1));
 
-			// convert censor to map
-			Map<String, Object> censorMap = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
-			});
-
-			Map<String, Object> contentMap = (Map<String, Object>) censorMap.get("content");
-
-			// list media in medias
-			List<Media> medias2 = new ArrayList<>();
-			medias2 = censor.getContent().getMedias();
-			System.out.println(medias2);
-			List<Map<String, Object>> medias = new ArrayList<>();
-			medias = (List<Map<String, Object>>) contentMap.get("medias");
-
-			// map of first media in medias
-//			Map<String, Object> media = mapper.convertValue(medias.get(0), new TypeReference<Map<String, Object>>() {
-//			});
-			// chỗ này anh nói cái hướng cho làm nha, chứ làm này là bị sai logic rồi á
-			// oke a
-			// chỗ này tạo vòng lặp for của cái medias xong rồi em cần push cái nào thì em
-			// mới set vào mới đúng
-
-			for (Map<String, Object> item : medias) {
-				item.put("type", "new value");
-			} // kiểu như này nè mới đúng
-
-			// update type
-//			media.put("type", "new value");
-//			media.remove("type"); //remove trường type
-
-//			medias.set(0, media);
-
-//			medias.add(media); //thêm media vào medias
-
-//			contentMap.put("medias", medias); // chỗ này đã put ở vòng lặp ròi medias tự set lại dữ liệu rồi nên khoogn cần put vô lại
-//			censorMap.put("content", contentMap);
-
-			// after update
-			System.out.println("\n" + censorMap);
-
-			// Convert Map to POJO
-//			 đang lỗi ở trường medias list trong entity
-//			Censor updatedCensor = mapper.convertValue(censorMap, Censor.class);
-
-//			System.out.println(updatedCensor);
-			// return censorRepository.save(censor);
-
-//			Gson gson = new Gson();
-//			JsonElement jsonElement = gson.toJsonTree(map);
-//			MyPojo pojo = gson.fromJson(jsonElement, MyPojo.class);
-
-//			censor.getContent().setMedias(null);
-//			censorRepository.save(censorMap);
-//			ObjectMapper objectMapper = new ObjectMapper();
-//			Censor pojo = objectMapper.convertValue(censorMap, Censor.class);
-//			System.err.println(pojo);
-
-		} catch (Exception e) {
-			System.out.println("error");
-			e.printStackTrace();
-		}
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 
 		return null;
 	}
 
+	// update type trong medias
 	public Censor updateMediaType_v2(String id) {
 		Censor censor = censorRepository.findBy_id(id);
 		for (Media media : censor.getContent().getMedias()) {
@@ -195,5 +123,22 @@ public class CensorService {
 		}
 
 		return censorRepository.save(censor);
+	}
+
+	// remove trường newField mới trong medias
+	public void removeFieldInMedias(String id) {
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$unset", new Document("content.medias.0.newField", ""));
+
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+	}
+
+	// Thêm 1 phần tử vào trong medias
+	public void addElementInMedias(String id) {
+		Document element = new Document("name", new String("Quang"));
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$push", new Document("content.medias", element));
+
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 	}
 }

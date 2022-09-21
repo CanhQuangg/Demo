@@ -26,13 +26,19 @@ public class CensorController {
 	// lấy tất cả
 	@GetMapping("/all")
 	public List<Censor> getAllCensor() {
-		return censorService.getAllCensor();
+		return censorService.getAllCensor_v2();
 	}
 
 	// lấy theo id
+//	@GetMapping("/{id}")
+//	public Map<String, Object> getById(@PathVariable(name = "id") String id) {
+//		return censorService.findCensorById(id);
+//	}
+
+	// lấy theo id bằng mongoTemplate
 	@GetMapping("/{id}")
-	public Map<String, Object> getById(@PathVariable(name = "id") String id) {
-		return censorService.findCensorById(id);
+	public Censor getById(@PathVariable(name = "id") String id) {
+		return censorService.findCensorById_v2(id);
 	}
 
 	// lấy media đầu tiên trong medias
@@ -41,35 +47,34 @@ public class CensorController {
 		return censorService.getMediasById(id);
 	}
 
-	// lấy toàn bộ media trong medias
-//	@GetMapping("/medias/{id}")
-//	public List<Map<String, Object>> getContentById(@PathVariable String id) {
-//		return censorService.getMediasById(id);
-//	}
-
-	// lấy doc có level lớn hơn 2
-	@GetMapping("/level")
-	public List<Censor> getLevelGreaterThan2() {
-		return censorService.getLevelGt2();
-	}
-
 	// cập nhật ngôn ngữ cho censor
-	@PutMapping("/{id}")
+	@PutMapping("/lang/{id}")
 	public Censor updateCensor(@PathVariable(name = "id") String id) {
-//		return censorService.updateCensor(id);
-		return censorService.updateCensor(id);
+		return censorService.updateCensorLang(id);
 	}
 
 	// Thêm trường bất kì vào medias
-	// chưa hoàn thành
 	@PutMapping("/update/medias/{id}")
 	public Censor updateAddNewFieldMedias(@PathVariable(name = "id") String id) {
 		return censorService.addNewFieldInMedias(id);
 	}
 
+	// Cập nhật type trong medias
 	@PutMapping("/update/mediatype/{id}")
 	public Censor updateMediaType(@PathVariable(name = "id") String id) {
-		return censorService.updateMediaType_v2(id);
+		return censorService.updateMediaType(id);
+	}
+
+	// remove trường newField
+	@PutMapping("/update/medias/remove/{id}")
+	public void removeFieldMedias(@PathVariable(name = "id") String id) {
+		censorService.removeFieldInMedias(id);
+	}
+
+	// Thêm phần tử vào trong medias
+	@PutMapping("/update/medias/add/{id}")
+	public void addMedia(@PathVariable(name = "id") String id) {
+		censorService.addElementInMedias(id);
 	}
 
 }

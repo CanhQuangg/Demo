@@ -83,4 +83,12 @@ public class CensorController {
 		censorService.removeElementInMedias(id);
 	}
 
+	// cập nhật type media trong medias với điều kiện
+	// media.id: 631ffb8b57c0d51e4cb366fd
+	// _id:631ffb8b57c0d51e4cb366fd
+	@PutMapping("/update/medias/type/{id}")
+	public void updateMediaTypeWithId(@PathVariable(name = "id") String id) {
+		censorService.updateMediaById(id);
+	}
+
 }

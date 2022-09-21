@@ -139,4 +139,20 @@ public class CensorService {
 
 		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 	}
+
+	// cập nhật phần tử media trong medias theo id
+	// _id:631ffb8b57c0d51e4cb366fd
+	// medias.id: 63285edd5045286952fba629
+	public void updateMediaById(String id) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(id));
+
+		Update update = new Update();
+		update.set("content.medias.$[cont].type", 2);
+		update.filterArray(Criteria.where("cont.id").is(new ObjectId("63285edd5045286952fba629")));
+
+		mongoTemplate.updateFirst(query, update, Censor.class);
+
+	}
+
 }

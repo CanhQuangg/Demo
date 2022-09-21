@@ -135,9 +135,17 @@ public class CensorService {
 
 	// Thêm 1 phần tử vào trong medias
 	public void addElementInMedias(String id) {
-		Document element = new Document("name", new String("Quang"));
+		Document element = new Document("name", new String("Nguyen Canh Quang"));
 		Document filter = new Document("_id", new ObjectId(id));
 		Document update = new Document("$push", new Document("content.medias", element));
+
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+	}
+
+	public void removeElementInMedias(String id) {
+		Document element = new Document("name", new String("Nguyen Canh Quang"));
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$pull", new Document("content.medias", element));
 
 		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 	}

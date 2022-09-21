@@ -66,7 +66,7 @@ public class CensorController {
 	}
 
 	// remove trường newField
-	@PutMapping("/update/medias/remove/{id}")
+	@PutMapping("/update/medias/removefield/{id}")
 	public void removeFieldMedias(@PathVariable(name = "id") String id) {
 		censorService.removeFieldInMedias(id);
 	}
@@ -75,6 +75,12 @@ public class CensorController {
 	@PutMapping("/update/medias/add/{id}")
 	public void addMedia(@PathVariable(name = "id") String id) {
 		censorService.addElementInMedias(id);
+	}
+
+	// Xoá phần tử mới thêm trong medias
+	@PutMapping("/update/medias/remove/{id}")
+	public void removeMedia(@PathVariable(name = "id") String id) {
+		censorService.removeElementInMedias(id);
 	}
 
 }

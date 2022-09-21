@@ -14,7 +14,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Censor;
-import com.example.entity.Censor.Content.Media;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,6 +94,16 @@ public class CensorService {
 		return mongoTemplate.findAndModify(query, update, Censor.class);
 	}
 
+	// cập nhật type trong medias
+	public Censor updateMediaType(String id) {
+		Document filter = new Document("_id", new ObjectId(id));
+		Document update = new Document("$set", new Document("content.medias.0.type", 1));
+
+		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+
+		return null;
+	}
+
 	// thêm trường cho media trong medias
 	public Censor addNewFieldInMedias(String id) {
 		Document filter = new Document("_id", new ObjectId(id));
@@ -105,27 +114,7 @@ public class CensorService {
 		return null;
 	}
 
-	// update media.type with mongoTemplate
-	public Censor updateMediaType(String id) {
-		Document filter = new Document("_id", new ObjectId(id));
-		Document update = new Document("$set", new Document("content.medias.0.type", 1));
-
-		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
-
-		return null;
-	}
-
-	// update type trong medias
-	public Censor updateMediaType_v2(String id) {
-		Censor censor = censorRepository.findBy_id(id);
-		for (Media media : censor.getContent().getMedias()) {
-			media.setType(5);
-		}
-
-		return censorRepository.save(censor);
-	}
-
-	// remove trường newField mới trong medias
+	// remove trường newField mới tạo trong medias
 	public void removeFieldInMedias(String id) {
 		Document filter = new Document("_id", new ObjectId(id));
 		Document update = new Document("$unset", new Document("content.medias.0.newField", ""));
@@ -142,6 +131,7 @@ public class CensorService {
 		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 	}
 
+	// xoá phần tử mới thêm
 	public void removeElementInMedias(String id) {
 		Document element = new Document("name", new String("Nguyen Canh Quang"));
 		Document filter = new Document("_id", new ObjectId(id));

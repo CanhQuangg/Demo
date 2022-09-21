@@ -53,16 +53,16 @@ public class CensorController {
 		return censorService.updateCensorLang(id);
 	}
 
-	// Thêm trường bất kì vào medias
-	@PutMapping("/update/medias/{id}")
-	public Censor updateAddNewFieldMedias(@PathVariable(name = "id") String id) {
-		return censorService.addNewFieldInMedias(id);
-	}
-
 	// Cập nhật type trong medias
 	@PutMapping("/update/mediatype/{id}")
 	public Censor updateMediaType(@PathVariable(name = "id") String id) {
 		return censorService.updateMediaType(id);
+	}
+
+	// Thêm trường bất kì vào medias
+	@PutMapping("/update/medias/{id}")
+	public Censor updateAddNewFieldMedias(@PathVariable(name = "id") String id) {
+		return censorService.addNewFieldInMedias(id);
 	}
 
 	// remove trường newField

@@ -18,6 +18,7 @@ import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
 @Service
@@ -144,15 +145,62 @@ public class CensorService {
 	// _id:631ffb8b57c0d51e4cb366fd
 	// medias.id: 63285edd5045286952fba629
 	public void updateMediaById(String id) {
-		Query query = new Query();
-		query.addCriteria(Criteria.where("_id").is(id));
-
-		Update update = new Update();
-		update.set("content.medias.$[cont].type", 2);
-		update.filterArray(Criteria.where("cont.id").is(new ObjectId("63285edd5045286952fba629")));
-
-		mongoTemplate.updateFirst(query, update, Censor.class);
+		MongoCollection<Document> collection = getCollectionCensorHis();
+		List<Document> arrayFilter = new ArrayList<Document>();
+		UpdateOptions updOpt = null;
+		Document updateData = new Document("content.medias.$[element].type", 2);
+		Document updateContent = new Document("$set", updateData);
+		arrayFilter.add(new Document("element._id", new ObjectId("63285edd5045286952fba629")));
+		updOpt = new UpdateOptions().arrayFilters(arrayFilter);
+		UpdateResult result = collection.updateOne(new Document("_id", new ObjectId(id)), updateContent, updOpt);
 
 	}
+
+//	public Censor updateType(Censor censor) {
+//		MongoCollection<Document> collection = getCollectionCensorHis();
+//		List<Document> arrayFilter = new ArrayList<Document>();
+//		Censor.Content.Media content = (Media) censor.getContent().getMedias();
+//		UpdateOptions updOpt = null;
+//		Date cureDate = new Date();
+//		Document updData = new Document("dl148",rule.getDl148())
+//				.append("dl149", rule.getDl149());
+//		Document updContent = null;
+//		try {
+//			//insert 1 content
+//			if(UzString.isEmpty(content.get_id())) {
+//				Document docContent = Document.parse(((BasicDBObject) BsonConvertUtils.convertValueObjectMapper(content, Commonrule.Content.class))
+//						.toJson());
+//				ObjectId idContent = new ObjectId();
+//				docContent.put("_id", idContent);
+//				docContent.put("dl146", cureDate);
+//				docContent.put("dl147",rule.getDl149());
+//				updContent = new Document("$set",updData);
+//				updContent = updContent.append("$addToSet", new Document("contents",docContent));
+//				rule.getContents().get(0).setDl146(cureDate);
+//				rule.getContents().get(0).set_id(idContent);
+//				rule.getContents().get(0).setDl147(rule.getDl149());
+//			}else {
+//				//update 1 content
+//				updData = updData.append("contents.$[element].lang", content.getLang())
+//						.append("contents.$[element].desc", content.getDesc())
+//						.append("contents.$[element].name", content.getName());
+//				updContent = new Document("$set",updData);
+//				arrayFilter.add(new Document("element._id",content.get_id()));
+//				rule.getContents().get(0).setDl148(cureDate);
+//				rule.getContents().get(0).setDl149(rule.getDl149());
+//			}
+//			updOpt = new UpdateOptions().arrayFilters(arrayFilter);
+//			UpdateResult result = collection.updateOne(new Document("_id",rule.get_id()),updContent,updOpt);
+//			if(result.getModifiedCount() > 0) {
+//				rule.setDl148(cureDate);
+//				rule.setDl149(rule.getDl147());
+//				rule.setContents(null);
+//				return rule;
+//			}
+//		} catch (MongoException e) {
+//			logger.error("Exception updateRule" + e);
+//		}
+//		return null;
+//	}
 
 }

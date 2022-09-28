@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.dto.CensorDtoTest;
 import com.example.entity.Censor;
 import com.example.service.CensorService;
 
@@ -42,10 +42,10 @@ public class CensorController {
 	}
 
 	// lấy media đầu tiên trong medias
-	@GetMapping("/medias/{id}")
-	public Map<String, Object> getContentById(@PathVariable String id) {
-		return censorService.getMediasById(id);
-	}
+//	@GetMapping("/medias/{id}")
+//	public Map<String, Object> getContentById(@PathVariable String id) {
+//		return censorService.getMediasById(id);
+//	}
 
 	// cập nhật ngôn ngữ cho censor
 	@PutMapping("/lang/{id}")
@@ -53,16 +53,16 @@ public class CensorController {
 		return censorService.updateCensorLang(id);
 	}
 
-	// Cập nhật type trong medias
-	@PutMapping("/update/mediatype/{id}")
-	public Censor updateMediaType(@PathVariable(name = "id") String id) {
-		return censorService.updateMediaType(id);
-	}
-
 	// Thêm trường bất kì vào medias
 	@PutMapping("/update/medias/{id}")
 	public Censor updateAddNewFieldMedias(@PathVariable(name = "id") String id) {
 		return censorService.addNewFieldInMedias(id);
+	}
+
+	// Cập nhật type trong medias
+	@PutMapping("/update/mediatype/{id}")
+	public Censor updateMediaType(@PathVariable(name = "id") String id) {
+		return censorService.updateMediaType(id);
 	}
 
 	// remove trường newField
@@ -89,6 +89,12 @@ public class CensorController {
 	@PutMapping("/update/medias/type/{id}")
 	public void updateMediaTypeWithId(@PathVariable(name = "id") String id) {
 		censorService.updateMediaById(id);
+	}
+
+	// tìm theo scope là pub và ngày lớn hơn..., sử dung aggregate
+	@GetMapping("/find")
+	public List<CensorDtoTest> getByAggregate() {
+		return censorService.findByDateAndScope();
 	}
 
 }

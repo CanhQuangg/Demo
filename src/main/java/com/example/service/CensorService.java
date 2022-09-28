@@ -1,6 +1,12 @@
 package com.example.service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -8,11 +14,15 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.CensorDtoTest;
 import com.example.entity.Censor;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -61,21 +71,21 @@ public class CensorService {
 	}
 
 	// lấy media đầu tiên trong medias
-	public Map<String, Object> getMediasById(String id) {
-		Censor censor = censorRepository.findBy_id(id);
-
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.convertValue(censor.getContent(), new TypeReference<Map<String, Object>>() {
-		});
-
-		List<Map<String, Object>> medias = new ArrayList<>();
-		medias = (List<Map<String, Object>>) map.get("medias");
-
-		Map<String, Object> media = mapper.convertValue(medias.get(1), new TypeReference<Map<String, Object>>() {
-		});
-
-		return media;
-	}
+//	public Map<String, Object> getMediasById(String id) {
+//		Censor censor = censorRepository.findBy_id(id);
+//
+//		ObjectMapper mapper = new ObjectMapper();
+//		Map<String, Object> map = mapper.convertValue(censor.getContent(), new TypeReference<Map<String, Object>>() {
+//		});
+//
+//		List<Map<String, Object>> medias = new ArrayList<>();
+//		medias = (List<Map<String, Object>>) map.get("medias");
+//
+//		Map<String, Object> media = mapper.convertValue(medias.get(1), new TypeReference<Map<String, Object>>() {
+//		});
+//
+//		return media;
+//	}
 
 	// cập nhật ngôn ngữ cho censor
 	public Censor updateCensor(String id) {
@@ -98,7 +108,7 @@ public class CensorService {
 	// cập nhật type trong medias
 	public Censor updateMediaType(String id) {
 		Document filter = new Document("_id", new ObjectId(id));
-		Document update = new Document("$set", new Document("content.medias.0.type", 1));
+		Document update = new Document("$set", new Document("content.medias.0.type", 20));
 
 		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
 
@@ -148,59 +158,68 @@ public class CensorService {
 		MongoCollection<Document> collection = getCollectionCensorHis();
 		List<Document> arrayFilter = new ArrayList<Document>();
 		UpdateOptions updOpt = null;
-		Document updateData = new Document("content.medias.$[element].type", 2);
+		Document updateData = new Document("content.medias.$[element].newfield", new String("new value"));
 		Document updateContent = new Document("$set", updateData);
-		arrayFilter.add(new Document("element._id", new ObjectId("63285edd5045286952fba629")));
+		arrayFilter.add(new Document("element.type", 10));
 		updOpt = new UpdateOptions().arrayFilters(arrayFilter);
 		UpdateResult result = collection.updateOne(new Document("_id", new ObjectId(id)), updateContent, updOpt);
-
 	}
 
-//	public Censor updateType(Censor censor) {
-//		MongoCollection<Document> collection = getCollectionCensorHis();
-//		List<Document> arrayFilter = new ArrayList<Document>();
-//		Censor.Content.Media content = (Media) censor.getContent().getMedias();
-//		UpdateOptions updOpt = null;
-//		Date cureDate = new Date();
-//		Document updData = new Document("dl148",rule.getDl148())
-//				.append("dl149", rule.getDl149());
-//		Document updContent = null;
-//		try {
-//			//insert 1 content
-//			if(UzString.isEmpty(content.get_id())) {
-//				Document docContent = Document.parse(((BasicDBObject) BsonConvertUtils.convertValueObjectMapper(content, Commonrule.Content.class))
-//						.toJson());
-//				ObjectId idContent = new ObjectId();
-//				docContent.put("_id", idContent);
-//				docContent.put("dl146", cureDate);
-//				docContent.put("dl147",rule.getDl149());
-//				updContent = new Document("$set",updData);
-//				updContent = updContent.append("$addToSet", new Document("contents",docContent));
-//				rule.getContents().get(0).setDl146(cureDate);
-//				rule.getContents().get(0).set_id(idContent);
-//				rule.getContents().get(0).setDl147(rule.getDl149());
-//			}else {
-//				//update 1 content
-//				updData = updData.append("contents.$[element].lang", content.getLang())
-//						.append("contents.$[element].desc", content.getDesc())
-//						.append("contents.$[element].name", content.getName());
-//				updContent = new Document("$set",updData);
-//				arrayFilter.add(new Document("element._id",content.get_id()));
-//				rule.getContents().get(0).setDl148(cureDate);
-//				rule.getContents().get(0).setDl149(rule.getDl149());
-//			}
-//			updOpt = new UpdateOptions().arrayFilters(arrayFilter);
-//			UpdateResult result = collection.updateOne(new Document("_id",rule.get_id()),updContent,updOpt);
-//			if(result.getModifiedCount() > 0) {
-//				rule.setDl148(cureDate);
-//				rule.setDl149(rule.getDl147());
-//				rule.setContents(null);
-//				return rule;
-//			}
-//		} catch (MongoException e) {
-//			logger.error("Exception updateRule" + e);
-//		}
-//		return null;
-//	}
+//    $match:{"content.scope" : "pub"}
+//},
+//{
+//    $match:{"when": {$gt: ISODate("2022-09-25T06:43:36.000Z")}}
+//},
+//{
+//    $project:{"_id":1, "content.scope":1, "when":1}
+//}
 
+//	db.censor.find(
+//		    {
+//		        $and: [
+//		            {"content.scope" : "pub"},
+//		            {"when": {$gte: ISODate("2022-09-26T06:43:36.000Z")}}
+//		            ]
+//		    },
+//		    {
+//		        "_id":1, "content.scope":1, "when":1
+//		    }
+//		    )
+
+	// lấy document có content.scope = pub và when lớn hơn ngày 25/09
+	public List<CensorDtoTest> findByDateAndScope() {
+		MongoCollection<Document> col = getCollectionCensorHis();
+
+		String dateStr = "2022-09-25";
+
+		// parse string to isoDate
+		LocalDateTime fromDate = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE).atStartOfDay();
+		Instant instant = fromDate.atZone(ZoneId.systemDefault()).toInstant();
+		Date dateParsed = Date.from(instant);
+
+		Criteria match1 = Criteria.where("content.scope").is("pub");
+		Criteria match2 = Criteria.where("when").gt(dateParsed);
+		ProjectionOperation project = Aggregation.project("_id", "content.scope", "when");
+
+//		MatchOperation match = Aggregation.match(match1);
+
+//		List<Document> listFilters = new ArrayList<>();
+//		listFilters.add(new Document("content.scope", "pub"));
+//		listFilters.add(new Document("when", new Document("$gte", dateParsed)));
+
+//		Document match = new Document("$match", listFilters);
+//		Document project = new Document("$project",
+//				new Document("_id", 1).append("content.scope", 1).append("when", 1));
+
+		Aggregation agg = Aggregation.newAggregation(Aggregation.match(match1), Aggregation.match(match2), project);
+
+		AggregationResults<CensorDtoTest> results = this.mongoTemplate.aggregate(agg, "censor", CensorDtoTest.class);
+
+		List<CensorDtoTest> getData = new ArrayList<>();
+		for (CensorDtoTest censor : results.getMappedResults()) {
+			getData.add(censor);
+		}
+
+		return getData;
+	}
 }

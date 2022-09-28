@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -54,7 +55,8 @@ public class Censor {
 		// kiểu dữ liệu Date
 		private String dl147;
 		private String dl146;
-		private String when;
+		// date
+		private LocalDateTime when;
 		private String lang;
 		private String langDefault;
 		private Integer isShare;
@@ -77,11 +79,12 @@ public class Censor {
 				private String frame;
 			}
 		}
-
 	}
 
 	private String type;
 	private Integer level;
-	private String when;
+
+	// date
+	private LocalDateTime when;
 
 }

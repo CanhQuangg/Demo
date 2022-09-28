@@ -7,5 +7,4 @@ import com.example.entity.Censor;
 public interface CensorRepository extends MongoRepository<Censor, String> {
 
 	Censor findBy_id(String _id);
-
 }

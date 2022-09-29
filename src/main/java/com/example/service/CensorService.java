@@ -27,7 +27,6 @@ import com.example.entity.Censor;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -223,11 +222,6 @@ public class CensorService {
 			getData.add(censor);
 		}
 
-		Query query = new Query();
-		List<CensorDtoTest> testData = mongoTemplate.find(query, CensorDtoTest.class);
-
-		FindIterable<Document> iterable = col.find(new Document("content.scope", "pub"));
-		System.out.println(iterable);
 		return getData;
 	}
 }

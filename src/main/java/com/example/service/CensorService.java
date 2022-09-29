@@ -31,7 +31,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
-@Service
+@Service("censorService")
 public class CensorService {
 
 	@Autowired

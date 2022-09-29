@@ -27,6 +27,7 @@ import com.example.entity.Censor;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -199,13 +200,15 @@ public class CensorService {
 
 		Criteria match1 = Criteria.where("content.scope").is("pub");
 		Criteria match2 = Criteria.where("when").gt(dateParsed);
-		ProjectionOperation project = Aggregation.project("_id", "content.scope", "when");
+		ProjectionOperation project = Aggregation.project("_id", "content.scope", "when", "content.content");
+
+//		SetOperation set = SetOperation.set("content.content").toValue("new content");
 
 //		MatchOperation match = Aggregation.match(match1);
 
 //		List<Document> listFilters = new ArrayList<>();
 //		listFilters.add(new Document("content.scope", "pub"));
-//		listFilters.add(new Document("when", new Document("$gte", dateParsed)));
+//		listFilters.add(new Document("when", new Document("$gt", dateParsed)));
 
 //		Document match = new Document("$match", listFilters);
 //		Document project = new Document("$project",
@@ -220,6 +223,11 @@ public class CensorService {
 			getData.add(censor);
 		}
 
+		Query query = new Query();
+		List<CensorDtoTest> testData = mongoTemplate.find(query, CensorDtoTest.class);
+
+		FindIterable<Document> iterable = col.find(new Document("content.scope", "pub"));
+		System.out.println(iterable);
 		return getData;
 	}
 }

@@ -12,4 +12,5 @@ public class CensorDtoTest {
 	private String _id;
 	private String scope;
 	private LocalDateTime when;
+	private String content;
 }

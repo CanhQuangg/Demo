@@ -1,11 +1,11 @@
 package com.example.controller;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +28,16 @@ public class PostController {
 		return postService.getAllPost();
 	}
 
+	// Get posts @async
+	@GetMapping("/allt")
+	public CompletableFuture<List<Post>> getPosts() {
+		return postService.getPosts();
+	}
+
 	@PostMapping("/add")
-	public Post createNewPost(@RequestBody Post newPost) {
-		return postService.addNewPost(newPost);
+	public String createNewPost() {
+		postService.addNewPost();
+		return new String("done");
+//		return postService.addNewPost();
 	}
 }

@@ -13,4 +13,11 @@ public class Post {
 	private String user;
 	private String title;
 	private String content;
+
+	public Post(String user, String title, String content) {
+		this.user = user;
+		this.title = title;
+		this.content = content;
+	}
+
 }

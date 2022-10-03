@@ -97,4 +97,10 @@ public class CensorController {
 		return censorService.findByDateAndScope();
 	}
 
+	// POST
+	// add new Censor
+//	@PostMapping("/add")
+//	public Censor addNewCensor(@RequestBody Censor newCensor) {
+//		return censorService.addNewCensor(newCensor);
+//	}
 }

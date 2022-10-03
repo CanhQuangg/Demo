@@ -224,4 +224,8 @@ public class CensorService {
 
 		return getData;
 	}
+
+//	public Censor addNewCensor(Censor newCensor) {
+//		return mongoTemplate.insert(newCensor, "censor");
+//	}
 }

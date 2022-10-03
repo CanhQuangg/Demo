@@ -7,8 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.entity.Post;
 import com.example.repository.PostRepository;
@@ -28,13 +30,28 @@ public class PostService {
 		return mongoTemplate.findAll(Post.class);
 	}
 
-	public Post addNewPost(Post newPost) {
-		return mongoTemplate.insert(newPost, "post");
+	public CompletableFuture<List<Post>> getPosts() {
+		LOGGER.info("get all @async test");
+		List<Post> posts = postRepository.findAll();
+		return CompletableFuture.completedFuture(posts);
 	}
 
+//	public Post addNewPost() {
+//		LOGGER.info("creating new post");
+//		Query query = new Query();
+//		String content = "Post " + (mongoTemplate.count(query, "post") + 1);
+//		Post newPost = new Post("Canh Quang", "post", content);
+//		return mongoTemplate.insert(newPost, "post");
+//	}
+
 	@Async
-	public CompletableFuture<Post> createPost(Post newPost) {
-		LOGGER.info("New post is saving");
+	@Transactional(rollbackFor = Exception.class)
+	public CompletableFuture<Post> addNewPost() {
+		LOGGER.info("creating new post with thread - " + Thread.currentThread().getName());
+		Query query = new Query();
+		String content = "Post " + (mongoTemplate.count(query, "post") + 1);
+		Post newPost = new Post("Canh Quang", "post", content);
+		LOGGER.info("new post with thread - " + Thread.currentThread().getName() + " - Done");
 		return CompletableFuture.completedFuture(mongoTemplate.insert(newPost, "post"));
 	}
 }

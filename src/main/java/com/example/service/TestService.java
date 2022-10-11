@@ -48,7 +48,10 @@ public class TestService {
 		Test newTest = new Test(content);
 		LOGGER.info("create new test with thread - " + Thread.currentThread().getName() + " - done");
 		return CompletableFuture.completedFuture(mongoTemplate.insert(newTest, "test"));
+	}
 
+	public void deleteTestById(String id) {
+		testRepository.deleteById(id);
 	}
 
 }

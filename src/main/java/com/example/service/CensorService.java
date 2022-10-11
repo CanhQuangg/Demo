@@ -8,7 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -24,11 +23,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.CensorDtoLang;
 import com.example.dto.CensorDtoTest;
 import com.example.entity.Censor;
 import com.example.repository.CensorRepository;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
@@ -65,20 +63,19 @@ public class CensorService {
 	}
 
 	// lấy censor theo id
-	public Map<String, Object> findCensorById(String id) {
-		try {
-			Censor censor = censorRepository.findBy_id(id);
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
-			});
-			return map;
-
-		} catch (MongoException e) {
-			LOGGER.info("Error: {}", e);
-			return null;
-		}
-
-	}
+//	public Map<String, Object> findCensorById(String id) {
+//		try {
+//			Censor censor = censorRepository.findBy_id(id);
+//			ObjectMapper mapper = new ObjectMapper();
+//			Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
+//			});
+//			return map;
+//
+//		} catch (MongoException e) {
+//			LOGGER.info("Error: {}", e);
+//			return null;
+//		}
+//	}
 
 	// findById with mongoTemplate: using
 	public Censor findCensorById_v2(String id) {
@@ -88,6 +85,18 @@ public class CensorService {
 
 		} catch (MongoException e) {
 			LOGGER.info("Error: {}", e);
+			return null;
+		}
+	}
+
+	// lấy censor trả về theo định dạng id và lang (CensorDtoLang) - phải sửa lại là
+	// CensorLangDto
+	public CensorDtoLang getCensorWithLang(String id) {
+		try {
+			CensorDtoLang data = mongoTemplate.findById(id, CensorDtoLang.class, "censor");
+			return data;
+		} catch (MongoException e) {
+			LOGGER.info("Error: {} ", e);
 			return null;
 		}
 	}
@@ -117,12 +126,12 @@ public class CensorService {
 	}
 
 	// update lang with mongoTemplate: using
-	public Censor updateCensorLang(String id) {
+	public Censor updateCensorLang(String id, String lang) {
 		Query query = new Query();
 		query.addCriteria(Criteria.where("_id").is(id));
 
 		Update update = new Update();
-		update.set("lang", "updated lang");
+		update.set("lang", lang);
 
 		return mongoTemplate.findAndModify(query, update, Censor.class);
 	}

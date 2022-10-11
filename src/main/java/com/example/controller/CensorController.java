@@ -31,6 +31,7 @@ public class CensorController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CensorController.class);
 
+	// lấy tất cả censor
 	@GetMapping("/all")
 	ResponseEntity<ResponseObject> getAllCensor() {
 		try {
@@ -54,10 +55,10 @@ public class CensorController {
 		try {
 			Censor data = censorService.findCensorById_v2(id);
 			if (data != null) {
-				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Get censor by id", data));
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("200", "Get censor by id " + id, data));
 			} else {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("404", "Not Found", ""));
-
 			}
 		} catch (MongoException e) {
 			LOGGER.info("Error: {}", e);
@@ -72,9 +73,18 @@ public class CensorController {
 //	}
 
 	// cập nhật ngôn ngữ cho censor
-	@PutMapping("/lang/{id}")
-	public Censor updateCensor(@PathVariable(name = "id") String id) {
-		return censorService.updateCensorLang(id);
+	@PutMapping("/lang/{id}/{newLang}")
+	public ResponseEntity<ResponseObject> updateCensor(@PathVariable(name = "id") String id,
+			@PathVariable(name = "newLang") String newLang) {
+		try {
+			censorService.updateCensorLang(id, newLang);
+			return ResponseEntity.status(HttpStatus.OK).body(
+					new ResponseObject("200", "Updated Censor with id " + id, censorService.getCensorWithLang(id)));
+		} catch (MongoException e) {
+			LOGGER.info("Error: {}", e);
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Error: " + e, ""));
+		}
 	}
 
 	// Thêm trường bất kì vào medias

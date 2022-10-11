@@ -12,6 +12,8 @@ import java.util.Map;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -27,6 +29,7 @@ import com.example.entity.Censor;
 import com.example.repository.CensorRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -40,6 +43,8 @@ public class CensorService {
 	@Autowired
 	private MongoTemplate mongoTemplate;
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CensorService.class);
+
 	private MongoCollection<Document> getCollectionCensorHis() {
 		return mongoTemplate.getCollection("censor");
 	}
@@ -51,23 +56,40 @@ public class CensorService {
 
 	// findAll Censor with mongoTemplate: using
 	public List<Censor> getAllCensor_v2() {
-		return mongoTemplate.findAll(Censor.class);
+		try {
+			return mongoTemplate.findAll(Censor.class);
+		} catch (MongoException e) {
+			LOGGER.info("Error: {}", e);
+			return null;
+		}
 	}
 
 	// lấy censor theo id
 	public Map<String, Object> findCensorById(String id) {
-		Censor censor = censorRepository.findBy_id(id);
+		try {
+			Censor censor = censorRepository.findBy_id(id);
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
+			});
+			return map;
 
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String, Object> map = mapper.convertValue(censor, new TypeReference<Map<String, Object>>() {
-		});
-		return map;
+		} catch (MongoException e) {
+			LOGGER.info("Error: {}", e);
+			return null;
+		}
+
 	}
 
 	// findById with mongoTemplate: using
 	public Censor findCensorById_v2(String id) {
-		Censor censor = mongoTemplate.findById(id, Censor.class);
-		return censor;
+		try {
+			Censor censor = mongoTemplate.findById(id, Censor.class);
+			return censor;
+
+		} catch (MongoException e) {
+			LOGGER.info("Error: {}", e);
+			return null;
+		}
 	}
 
 	// lấy media đầu tiên trong medias

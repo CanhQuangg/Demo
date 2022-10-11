@@ -2,7 +2,11 @@ package com.example.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.CensorDtoTest;
 import com.example.entity.Censor;
+import com.example.entity.ResponseObject;
 import com.example.service.CensorService;
+import com.mongodb.MongoException;
 
 @RestController
 @RequestMapping("/censor")
@@ -23,22 +29,40 @@ public class CensorController {
 		this.censorService = censorService;
 	}
 
-	// lấy tất cả
-	@GetMapping("/all")
-	public List<Censor> getAllCensor() {
-		return censorService.getAllCensor_v2();
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(CensorController.class);
 
-	// lấy theo id
-//	@GetMapping("/{id}")
-//	public Map<String, Object> getById(@PathVariable(name = "id") String id) {
-//		return censorService.findCensorById(id);
-//	}
+	@GetMapping("/all")
+	ResponseEntity<ResponseObject> getAllCensor() {
+		try {
+			List<Censor> data = censorService.getAllCensor_v2();
+
+			if (data.size() > 0) {
+				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Get all censor", data));
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+						.body(new ResponseObject("404", "Censor does not exist", ""));
+			}
+		} catch (MongoException e) {
+			LOGGER.info("==> Exception get All Censor: {}", e);
+			return ResponseEntity.status(500).body(new ResponseObject("500", "Error: server error", ""));
+		}
+	}
 
 	// lấy theo id bằng mongoTemplate
 	@GetMapping("/{id}")
-	public Censor getById(@PathVariable(name = "id") String id) {
-		return censorService.findCensorById_v2(id);
+	public ResponseEntity<ResponseObject> getById(@PathVariable(name = "id") String id) {
+		try {
+			Censor data = censorService.findCensorById_v2(id);
+			if (data != null) {
+				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Get censor by id", data));
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("404", "Not Found", ""));
+
+			}
+		} catch (MongoException e) {
+			LOGGER.info("Error: {}", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("400", "Error", ""));
+		}
 	}
 
 	// lấy media đầu tiên trong medias

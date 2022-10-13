@@ -243,17 +243,18 @@ public class CensorService {
 //		    )
 
 	// lấy document có content.scope = pub và when lớn hơn ngày 25/09
-	public List<CensorDtoTest> findByDateAndScope() {
+	public List<CensorDtoTest> findByDateAndScope(String scope, String date) {
 		MongoCollection<Document> col = getCollectionCensorHis();
 
-		String dateStr = "2022-09-25";
+//		String dateStr = "2022-09-01";
+		String dateStr = date;
 
 		// parse string to isoDate
 		LocalDateTime fromDate = LocalDate.parse(dateStr, DateTimeFormatter.ISO_DATE).atStartOfDay();
 		Instant instant = fromDate.atZone(ZoneId.systemDefault()).toInstant();
 		Date dateParsed = Date.from(instant);
 
-		Criteria match1 = Criteria.where("content.scope").is("pub");
+		Criteria match1 = Criteria.where("content.scope").is(scope);
 		Criteria match2 = Criteria.where("when").gt(dateParsed);
 		ProjectionOperation project = Aggregation.project("_id", "content.scope", "when", "content.content");
 

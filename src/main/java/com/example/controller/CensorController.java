@@ -198,9 +198,20 @@ public class CensorController {
 
 	}
 
-	// tìm theo scope là pub và ngày lớn hơn..., sử dung aggregate
+	// tìm theo scope = pub và ngày lớn hơn..., sử dung aggregate
 	@GetMapping("/find")
-	public List<CensorDtoTest> getByAggregate() {
-		return censorService.findByDateAndScope();
+	public ResponseEntity<ResponseObject> getByAggregate(@RequestParam String scope, @RequestParam String date) {
+		try {
+			List<CensorDtoTest> data = censorService.findByDateAndScope(scope, date);
+			if (data.size() == 0) {
+				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("404", "Not found", ""));
+			}
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Find by Scope and When", data));
+
+		} catch (Exception e) {
+			LOGGER.info("Error: " + e);
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor ", ""));
+		}
 	}
 }

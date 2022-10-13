@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.CensorDtoTest;
@@ -77,9 +78,14 @@ public class CensorController {
 	public ResponseEntity<ResponseObject> updateCensor(@PathVariable(name = "id") String id,
 			@PathVariable(name = "newLang") String newLang) {
 		try {
-			censorService.updateCensorLang(id, newLang);
-			return ResponseEntity.status(HttpStatus.OK).body(
-					new ResponseObject("200", "Updated Censor with id " + id, censorService.getCensorWithLang(id)));
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			} else {
+				censorService.updateCensorLang(id, newLang);
+				return ResponseEntity.status(HttpStatus.OK).body(
+						new ResponseObject("200", "Updated Censor with id " + id, censorService.getCensorWithLang(id)));
+			}
 		} catch (MongoException e) {
 			LOGGER.info("Error: {}", e);
 			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
@@ -89,8 +95,15 @@ public class CensorController {
 
 	// Thêm trường bất kì vào medias
 	@PutMapping("/update/medias/{id}")
-	public Censor updateAddNewFieldMedias(@PathVariable(name = "id") String id) {
-		return censorService.addNewFieldInMedias(id);
+	public ResponseEntity<ResponseObject> updateAddNewFieldMedias(@PathVariable(name = "id") String id,
+			@RequestParam(name = "field") String newField, @RequestParam String value) {
+		try {
+			censorService.addNewFieldInMedias(id, newField, value);
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
+		} catch (MongoException e) {
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+		}
 	}
 
 	// Cập nhật type trong medias

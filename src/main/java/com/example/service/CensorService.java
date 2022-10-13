@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import com.example.dto.CensorDtoLang;
 import com.example.dto.CensorDtoTest;
 import com.example.entity.Censor;
+import com.example.entity.Censor.Content.Media;
 import com.example.repository.CensorRepository;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -80,8 +82,15 @@ public class CensorService {
 	// findById with mongoTemplate: using
 	public Censor findCensorById_v2(String id) {
 		try {
-			Censor censor = mongoTemplate.findById(id, Censor.class);
-			return censor;
+			Optional<Censor> censor = censorRepository.findById(id);
+			if (censor.isPresent()) {
+				Censor data = mongoTemplate.findById(id, Censor.class);
+				LOGGER.info("done");
+				return data;
+			} else {
+				LOGGER.info("Cannot find Censor " + id);
+				return null;
+			}
 
 		} catch (MongoException e) {
 			LOGGER.info("Error: {}", e);
@@ -147,13 +156,16 @@ public class CensorService {
 	}
 
 	// thêm trường cho media trong medias
-	public Censor addNewFieldInMedias(String id) {
+	public void addNewFieldInMedias(String id, String newField, String value) {
+		Censor censor = mongoTemplate.findById(id, Censor.class);
+		List<Media> medias = censor.getContent().getMedias();
 		Document filter = new Document("_id", new ObjectId(id));
-		Document update = new Document("$set", new Document("content.medias.0.newField", "new field value"));
 
-		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
-
-		return null;
+		for (int i = 0; i < medias.size(); i++) {
+			Document update = new Document("$set",
+					new Document(String.format("content.medias.%x.%s", i, newField), value));
+			UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+		}
 	}
 
 	// remove trường newField mới tạo trong medias

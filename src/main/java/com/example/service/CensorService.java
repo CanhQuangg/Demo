@@ -157,8 +157,7 @@ public class CensorService {
 
 	// thêm trường cho media trong medias
 	public void addNewFieldInMedias(String id, String newField, String value) {
-		Censor censor = mongoTemplate.findById(id, Censor.class);
-		List<Media> medias = censor.getContent().getMedias();
+		List<Media> medias = mongoTemplate.findById(id, Censor.class).getContent().getMedias();
 		Document filter = new Document("_id", new ObjectId(id));
 
 		for (int i = 0; i < medias.size(); i++) {
@@ -169,11 +168,14 @@ public class CensorService {
 	}
 
 	// remove trường newField mới tạo trong medias
-	public void removeFieldInMedias(String id) {
+	public void removeFieldInMedias(String id, String field) {
+		List<Media> medias = mongoTemplate.findById(id, Censor.class).getContent().getMedias();
 		Document filter = new Document("_id", new ObjectId(id));
-		Document update = new Document("$unset", new Document("content.medias.0.newField", ""));
 
-		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+		for (int i = 0; i < medias.size(); i++) {
+			Document update = new Document("$unset", new Document(String.format("content.medias.%x.%s", i, field), ""));
+			UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+		}
 	}
 
 	// Thêm 1 phần tử vào trong medias
@@ -186,12 +188,17 @@ public class CensorService {
 	}
 
 	// xoá phần tử mới thêm
-	public void removeElementInMedias(String id) {
-		Document element = new Document("name", new String("Nguyen Canh Quang"));
-		Document filter = new Document("_id", new ObjectId(id));
-		Document update = new Document("$pull", new Document("content.medias", element));
+	public Boolean removeElementInMedias(String id, String mediaId) {
+		try {
+			Document element = new Document("id", mediaId);
+			Document filter = new Document("_id", new ObjectId(id));
+			Document update = new Document("$pull", new Document("content.medias", element));
 
-		UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+			UpdateResult result = getCollectionCensorHis().updateOne(filter, update);
+			return true;
+		} catch (MongoException e) {
+			return false;
+		}
 	}
 
 	// cập nhật phần tử media trong medias theo id

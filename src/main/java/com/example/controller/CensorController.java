@@ -98,6 +98,10 @@ public class CensorController {
 	public ResponseEntity<ResponseObject> updateAddNewFieldMedias(@PathVariable(name = "id") String id,
 			@RequestParam(name = "field") String newField, @RequestParam String value) {
 		try {
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			}
 			censorService.addNewFieldInMedias(id, newField, value);
 			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
 		} catch (MongoException e) {
@@ -112,22 +116,61 @@ public class CensorController {
 		return censorService.updateMediaType(id);
 	}
 
-	// remove trường newField
+	// remove trường được chỉ định trong medias
 	@PutMapping("/update/medias/removefield/{id}")
-	public void removeFieldMedias(@PathVariable(name = "id") String id) {
-		censorService.removeFieldInMedias(id);
+	public ResponseEntity<ResponseObject> removeFieldMedias(@PathVariable(name = "id") String id,
+			@RequestParam String field) {
+		try {
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			}
+			censorService.removeFieldInMedias(id, field);
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
+		} catch (MongoException e) {
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+		}
 	}
 
 	// Thêm phần tử vào trong medias
 	@PutMapping("/update/medias/add/{id}")
-	public void addMedia(@PathVariable(name = "id") String id) {
-		censorService.addElementInMedias(id);
+	public ResponseEntity<ResponseObject> addMedia(@PathVariable(name = "id") String id) {
+		try {
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			}
+			censorService.addElementInMedias(id);
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
+		} catch (Exception e) {
+			LOGGER.info("Error: " + e);
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+		}
 	}
 
-	// Xoá phần tử mới thêm trong medias
+	// Xoá phần tử trong medias theo media.id
 	@PutMapping("/update/medias/remove/{id}")
-	public void removeMedia(@PathVariable(name = "id") String id) {
-		censorService.removeElementInMedias(id);
+	public ResponseEntity<ResponseObject> removeMedia(@PathVariable(name = "id") String id,
+			@RequestParam String mediaId) {
+		try {
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			}
+			if (censorService.removeElementInMedias(id, mediaId)) {
+				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
+			} else {
+				return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+						.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+			}
+
+		} catch (Exception e) {
+			LOGGER.info("Error: " + e);
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+		}
 	}
 
 	// cập nhật type media trong medias với điều kiện
@@ -143,11 +186,4 @@ public class CensorController {
 	public List<CensorDtoTest> getByAggregate() {
 		return censorService.findByDateAndScope();
 	}
-
-	// POST
-	// add new Censor
-//	@PostMapping("/add")
-//	public Censor addNewCensor(@RequestBody Censor newCensor) {
-//		return censorService.addNewCensor(newCensor);
-//	}
 }

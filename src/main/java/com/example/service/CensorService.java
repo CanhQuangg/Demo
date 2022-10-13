@@ -201,18 +201,24 @@ public class CensorService {
 		}
 	}
 
-	// cập nhật phần tử media trong medias theo id
+	// cập nhật phần tử media type trong medias theo id
 	// _id:631ffb8b57c0d51e4cb366fd
 	// medias.id: 63285edd5045286952fba629
-	public void updateMediaById(String id) {
-		MongoCollection<Document> collection = getCollectionCensorHis();
-		List<Document> arrayFilter = new ArrayList<Document>();
-		UpdateOptions updOpt = null;
-		Document updateData = new Document("content.medias.$[element].newfield", new String("new value"));
-		Document updateContent = new Document("$set", updateData);
-		arrayFilter.add(new Document("element.type", 10));
-		updOpt = new UpdateOptions().arrayFilters(arrayFilter);
-		UpdateResult result = collection.updateOne(new Document("_id", new ObjectId(id)), updateContent, updOpt);
+	public Boolean updateMediaById(String id, String mediaId, int newType) {
+		try {
+			MongoCollection<Document> collection = getCollectionCensorHis();
+			List<Document> arrayFilter = new ArrayList<Document>();
+			UpdateOptions updOpt = null;
+			Document updateData = new Document("content.medias.$[element].type", newType);
+			Document updateContent = new Document("$set", updateData);
+			arrayFilter.add(new Document("element._id", new ObjectId(mediaId)));
+			updOpt = new UpdateOptions().arrayFilters(arrayFilter);
+			UpdateResult result = collection.updateOne(new Document("_id", new ObjectId(id)), updateContent, updOpt);
+			return true;
+		} catch (MongoException e) {
+			LOGGER.info("Error: " + e);
+			return false;
+		}
 	}
 
 //    $match:{"content.scope" : "pub"}

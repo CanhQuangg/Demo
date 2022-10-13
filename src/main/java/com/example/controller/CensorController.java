@@ -177,8 +177,25 @@ public class CensorController {
 	// media.id: 631ffb8b57c0d51e4cb366fd
 	// _id:631ffb8b57c0d51e4cb366fd
 	@PutMapping("/update/medias/type/{id}")
-	public void updateMediaTypeWithId(@PathVariable(name = "id") String id) {
-		censorService.updateMediaById(id);
+	public ResponseEntity<ResponseObject> updateMediaTypeWithId(@PathVariable(name = "id") String id,
+			@RequestParam String mediaId, @RequestParam int newType) {
+		try {
+			if (censorService.findCensorById_v2(id) == null) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new ResponseObject("404", "Cannot found Censor " + id, ""));
+			}
+			if (censorService.updateMediaById(id, mediaId, newType)) {
+				return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Updated Censor " + id, ""));
+			} else {
+				return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+						.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+			}
+		} catch (Exception e) {
+			LOGGER.info("Error: " + e);
+			return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+					.body(new ResponseObject("503", "Cannot update Censor " + id, ""));
+		}
+
 	}
 
 	// tìm theo scope là pub và ngày lớn hơn..., sử dung aggregate

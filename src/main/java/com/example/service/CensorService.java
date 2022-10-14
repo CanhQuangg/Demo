@@ -155,6 +155,9 @@ public class CensorService {
 		return null;
 	}
 
+	// https://stackoverflow.com/questions/35220287/upsert-mongo-document-using-spring-data-mongo
+	// upsert
+
 	// thêm trường cho media trong medias
 	public void addNewFieldInMedias(String id, String newField, String value) {
 		List<Media> medias = mongoTemplate.findById(id, Censor.class).getContent().getMedias();

@@ -85,6 +85,20 @@ public class TestService {
 			output.forEach(System.out::println);
 			System.out.println("============");
 		}
-
 	}
+
+	// upsert Test
+	// https://stackoverflow.com/questions/35220287/upsert-mongo-document-using-spring-data-mongo
+//	public Test upsertTestById(String id, Test test) {
+//		try {
+//			Optional<Test> data = testRepository.findById(id);
+//			if (data.isPresent()) {
+//
+//				return null;
+//			}
+//		} catch (MongoException e) {
+//			LOGGER.info("Error: " + e);
+//			return null;
+//		}
+//	}
 }

@@ -2,6 +2,7 @@ package com.example.controller;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,14 +41,10 @@ public class TestController {
 	@PostMapping("/add")
 	@Transactional(rollbackFor = Exception.class)
 	// đang bị tạo 2 test có cùng số
-	public String createNewTest() {
-		CompletableFuture<Test> createTest = new CompletableFuture<>();
-		createTest.complete(testService.addNewTest());
-//		CompletableFuture<Test> createTest1 = testService.addNewTest();
+	public String createNewTest() throws InterruptedException, ExecutionException {
+		CompletableFuture<Test> createTest = testService.addNewTest();
+		CompletableFuture<Test> createTest1 = testService.addNewTest();
 		CompletableFuture<Post> createPost = postService.addNewPost();
-
-		Test test = createTest.get();
-		System.out.println(test);
 
 //		CompletableFuture.allOf(testService.addNewTest(), testService.addNewTest(), postService.addNewPost()).join();
 		return new String("done");

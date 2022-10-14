@@ -33,12 +33,18 @@ public class Test2Controller {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Get all Test", data));
 	}
 
+	@GetMapping("/page")
+	ResponseEntity<ResponseObject> getTestPage() {
+		service.getTestPage();
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Get all Test", ""));
+	}
+
 	@GetMapping("/{id}")
 	ResponseEntity<ResponseObject> getTest2(@PathVariable(name = "id") String id) {
-
-		Optional<Test> test = repository.findById(id);
-		if (test.isPresent()) {
-			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Find test by id", test));
+		Test test = service.getTestById(id);
+//		Optional<Test> test = repository.findById(id);
+		if (test != null) {
+			return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("200", "Find test by id " + id, test));
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND)
 					.body(new ResponseObject("404", "Cannot find test by that id", ""));

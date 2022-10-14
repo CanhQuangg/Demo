@@ -1,11 +1,14 @@
 package com.example.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.entity.Test;
 import com.example.repository.TestRepository;
+import com.mongodb.MongoException;
 
 @Service
 public class TestService {
@@ -28,7 +32,11 @@ public class TestService {
 	public CompletableFuture<List<Test>> getAll() {
 		LOGGER.info("get all test");
 		List<Test> tests = testRepository.findAll();
-		return CompletableFuture.completedFuture(tests);
+		List<Test> data = new ArrayList<>();
+		for (int i = tests.size() - 2; i < tests.size(); i++) {
+			data.add(tests.get(i));
+		}
+		return CompletableFuture.completedFuture(data);
 	}
 
 //	public Test addNewTest() {
@@ -54,4 +62,29 @@ public class TestService {
 		testRepository.deleteById(id);
 	}
 
+	public Test getTestById(String id) {
+		try {
+			Optional<Test> test = testRepository.findById(id);
+			if (test.isPresent()) {
+				return mongoTemplate.findById(id, Test.class);
+			} else {
+				return null;
+			}
+		} catch (MongoException e) {
+			LOGGER.info("Error: " + e);
+			return null;
+		}
+	}
+
+	// Phân trang khi lấy tất cả các test
+	public void getTestPage() {
+		List<Test> data = mongoTemplate.findAll(Test.class);
+		for (int i = 0; i <= (data.size() / 5); i++) {
+			Query query = new Query().with(Sort.by(Sort.Order.asc("name"))).limit(5).skip(i * 5);
+			List<Test> output = mongoTemplate.find(query, Test.class);
+			output.forEach(System.out::println);
+			System.out.println("============");
+		}
+
+	}
 }

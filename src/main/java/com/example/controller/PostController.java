@@ -29,7 +29,7 @@ public class PostController {
 	}
 
 	// Get posts @async
-	@GetMapping("/allt")
+	@GetMapping("/get")
 	public CompletableFuture<List<Post>> getPosts() {
 		return postService.getPosts();
 	}

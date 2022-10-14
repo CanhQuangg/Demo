@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,7 +34,13 @@ public class PostService {
 	public CompletableFuture<List<Post>> getPosts() {
 		LOGGER.info("get all @async test");
 		List<Post> posts = postRepository.findAll();
-		return CompletableFuture.completedFuture(posts);
+
+		List<Post> data = new ArrayList<>();
+		for (int i = posts.size() - 2; i < posts.size(); i++) {
+			data.add(posts.get(i));
+		}
+
+		return CompletableFuture.completedFuture(data);
 	}
 
 //	public Post addNewPost() {

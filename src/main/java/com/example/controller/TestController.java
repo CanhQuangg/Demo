@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.config.TaskExecutor;
 import com.example.entity.Post;
 import com.example.entity.Test;
 import com.example.service.PostService;
@@ -24,6 +25,9 @@ public class TestController {
 	private PostService postService;
 
 	@Autowired
+	TaskExecutor executor;
+
+	@Autowired
 	public TestController(TestService testService) {
 		this.testService = testService;
 	}
@@ -35,14 +39,17 @@ public class TestController {
 
 	@PostMapping("/add")
 	@Transactional(rollbackFor = Exception.class)
+	// đang bị tạo 2 test có cùng số
 	public String createNewTest() {
-		CompletableFuture<Test> createTest = testService.addNewTest();
+		CompletableFuture<Test> createTest = new CompletableFuture<>();
+		createTest.complete(testService.addNewTest());
 //		CompletableFuture<Test> createTest1 = testService.addNewTest();
-//		CompletableFuture<Test> createTest2 = testService.addNewTest();
-//		CompletableFuture<Test> createTest3 = testService.addNewTest();
 		CompletableFuture<Post> createPost = postService.addNewPost();
 
-		CompletableFuture.allOf(createTest, createPost).join();
+		Test test = createTest.get();
+		System.out.println(test);
+
+//		CompletableFuture.allOf(testService.addNewTest(), testService.addNewTest(), postService.addNewPost()).join();
 		return new String("done");
 	}
 }
